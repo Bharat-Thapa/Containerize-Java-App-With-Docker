@@ -1,14 +1,23 @@
-#Getting base image
-FROM openjdk:11
+# Stage 1: Build stage
+FROM openjdk:11 AS builder
 
-#Working directory where all code will be kept
-WORKDIR app/
+# Set the working directory in the container
+WORKDIR /app
 
-#Copy the app in the current directory of container
-COPY Main.java .
+# Copy the source code into the container
+COPY src/* .
 
-#Compile code
+# Compile the Java code
 RUN javac Main.java
 
-#Run java compiled code
-CMD ["java","Main"]
+# Stage 2: Execution stage
+FROM openjdk:11-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the compiled classes from the builder stage
+COPY --from=builder /app .
+
+# Run the Java application
+CMD ["java", "Main"]
